@@ -1,4 +1,5 @@
 const path = require("path");
+const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
 
 exports.getSignUpPage = (req, res, next) => {
@@ -23,10 +24,12 @@ exports.postUserSignUp = async (req, res, next) => {
       return res.status(400).json({ message: "Email is already in use" });
     }
 
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     const newUser = await User.create({
       name: name,
       email: email,
-      password: password,
+      password: hashedPassword,
     });
 
     res
@@ -48,7 +51,9 @@ exports.postUserLogin = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
-    if (user.password !== password) {
+    
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid Password" });
     }
 
