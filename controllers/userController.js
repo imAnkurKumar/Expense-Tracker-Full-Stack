@@ -1,7 +1,14 @@
 const path = require("path");
 const User = require("../models/userModel");
+
 exports.getSignUpPage = (req, res, next) => {
   res.sendFile(path.join(__dirname, "../", "public", "views", "signUp.html"));
+};
+
+exports.getLoginPage = (req, res, next) => {
+  res.sendFile(
+    path.join(__dirname, "../", "public", "views", "loginPage.html")
+  );
 };
 
 exports.postUserSignUp = async (req, res, next) => {
@@ -10,8 +17,9 @@ exports.postUserSignUp = async (req, res, next) => {
   let password = req.body.password;
 
   try {
-    const existingUser = await User.findOne({ email: email });
+    const existingUser = await User.findOne({ where: { email: email } });
     if (existingUser) {
+      console.log("User already exists:", existingUser.email);
       return res.status(400).json({ message: "Email is already in use" });
     }
 
@@ -30,4 +38,23 @@ exports.postUserSignUp = async (req, res, next) => {
   }
 };
 
-// login page
+exports.postUserLogin = async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Invalid Password" });
+    }
+
+    res.status(200).json({ message: "Login Successful" });
+  } catch (error) {
+    console.error("Login Error : ", error);
+    res.status(500).json({ message: "server error" });
+  }
+};

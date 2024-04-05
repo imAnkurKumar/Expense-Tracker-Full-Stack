@@ -5,7 +5,9 @@ const userController = require("../controllers/userController");
 router.use(express.static("public"));
 
 router.get("/", userController.getSignUpPage);
-
 router.post("/signUp", userController.postUserSignUp);
+
+router.get("/login", userController.getLoginPage);
+router.post("/login", userController.postUserLogin);
 
 module.exports = router;
