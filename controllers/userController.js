@@ -1,6 +1,14 @@
 const path = require("path");
 const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
+const jwt = require("jsonwebtoken");
+
+function generateAccessToken(id, email) {
+  return jwt.sign(
+    { userId: id, email: email },
+    "kjhsgdfiuiew889kbasgdfskjabsdfjlabsbdljhsd"
+  );
+}
 
 exports.getSignUpPage = (req, res, next) => {
   res.sendFile(path.join(__dirname, "../", "public", "views", "signUp.html"));
@@ -47,17 +55,21 @@ exports.postUserLogin = async (req, res, next) => {
 
   try {
     const user = await User.findOne({ where: { email } });
+    // console.log("user.id :", user.id);
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
-    
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid Password" });
     }
 
-    res.status(200).json({ message: "Login Successful" });
+    const token = generateAccessToken(user.id, user.email);
+    // console.log("token: ", token);
+
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     console.error("Login Error : ", error);
     res.status(500).json({ message: "server error" });
