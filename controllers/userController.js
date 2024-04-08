@@ -3,21 +3,24 @@ const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 
-function generateAccessToken(id, email) {
-  return jwt.sign({ userId: id, email: email }, process.env.TOKEN_SECRET);
+function generateAccessToken(id, email, isPremiumUser) {
+  return jwt.sign(
+    { userId: id, email: email, isPremiumUser },
+    process.env.TOKEN_SECRET
+  );
 }
 
-exports.getSignUpPage = (req, res, next) => {
+const getSignUpPage = (req, res, next) => {
   res.sendFile(path.join(__dirname, "../", "public", "views", "signUp.html"));
 };
 
-exports.getLoginPage = (req, res, next) => {
+const getLoginPage = (req, res, next) => {
   res.sendFile(
     path.join(__dirname, "../", "public", "views", "loginPage.html")
   );
 };
 
-exports.postUserSignUp = async (req, res, next) => {
+const postUserSignUp = async (req, res, next) => {
   const name = req.body.name;
   const email = req.body.email;
   let password = req.body.password;
@@ -46,13 +49,13 @@ exports.postUserSignUp = async (req, res, next) => {
   }
 };
 
-exports.postUserLogin = async (req, res, next) => {
+const postUserLogin = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
 
   try {
     const user = await User.findOne({ where: { email } });
-    // console.log("user.id :", user.id);
+    // console.log("user--- :", user);
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
@@ -63,7 +66,7 @@ exports.postUserLogin = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid Password" });
     }
 
-    const token = generateAccessToken(user.id, user.email);
+    const token = generateAccessToken(user.id, user.email, user.isPremiumUser);
     // console.log("token: ", token);
 
     res.status(200).json({ message: "Login successful", token });
@@ -71,4 +74,11 @@ exports.postUserLogin = async (req, res, next) => {
     console.error("Login Error : ", error);
     res.status(500).json({ message: "server error" });
   }
+};
+module.exports = {
+  generateAccessToken,
+  postUserLogin,
+  postUserSignUp,
+  getLoginPage,
+  getSignUpPage,
 };

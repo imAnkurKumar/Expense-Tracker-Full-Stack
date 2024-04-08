@@ -4,9 +4,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   const buyPremiumButton = document.getElementById("buy-premium-button");
   let token;
 
+  function parseJwt(token) {
+    var base64Url = token.split(".")[1];
+    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    var jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+
+    return JSON.parse(jsonPayload);
+  }
+
+  function showPremiumuserMember() {
+    buyPremiumButton.style.visibility = "hidden";
+    document.getElementById("message").innerHTML = "You are premium user";
+    showLeaderboard();
+  }
   try {
     token = localStorage.getItem("token");
-    console.log("token", token);
+    // console.log("token", token);
+    const decodedToken = parseJwt(token);
+    console.log(decodedToken);
+    const isPremiumUser = decodedToken.isPremiumUser;
+    if (isPremiumUser) {
+      showPremiumuserMember();
+    }
+
     if (!token) {
       console.error("token is missing");
     } else {
@@ -93,6 +121,16 @@ document.addEventListener("DOMContentLoaded", async () => {
    `;
     return expenseItem;
   }
+  function showLeaderboard() {
+    const showLeaderboardButton = document.createElement("button");
+    showLeaderboardButton.textContent = "Show Leaderboard";
+    showLeaderboardButton.classList.add("show-leaderboard-button");
+
+    showLeaderboardButton.addEventListener("click", () => {
+      window.open("leaderboard.html", "_blank");
+    });
+    document.getElementById("message").appendChild(showLeaderboardButton);
+  }
 
   buyPremiumButton.addEventListener("click", async (e) => {
     e.preventDefault();
@@ -106,7 +144,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       key: response.data.key_id,
       order_id: response.data.order.id,
       handler: async function (response) {
-        await axios.post(
+        const res = await axios.post(
           "http://localhost:4000/purchase/updateTransactionstatus",
           {
             order_id: options.order_id,
@@ -115,6 +153,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           { headers: { Authorization: token } }
         );
         alert("You are a Premium User Now");
+        buyPremiumButton.style.visibility = "hidden";
+        document.getElementById("message").innerHTML = "You are premium user";
+        localStorage.setItem("token", res.data.token);
       },
     };
     const rzp1 = new Razorpay(options);

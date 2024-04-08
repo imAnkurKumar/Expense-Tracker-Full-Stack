@@ -6,11 +6,11 @@ const authenticate = (req, res, next) => {
     const token = req.header("Authorization");
     const user = jwt.verify(token, process.env.TOKEN_SECRET);
 
-    console.log("user: ", user);
-    console.log("userId : ", user.userId);
+    // console.log("user in auth.js >>: ", user);
+    // console.log("userId : ", user.userId);
     User.findByPk(user.userId).then((user) => {
       req.user = user;
-      console.log(req.user);
+      // console.log(req.user);
       next();
     });
   } catch (err) {
