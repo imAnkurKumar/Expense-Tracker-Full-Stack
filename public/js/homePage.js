@@ -156,6 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         buyPremiumButton.style.visibility = "hidden";
         document.getElementById("message").innerHTML = "You are premium user";
         localStorage.setItem("token", res.data.token);
+        showLeaderboard();
       },
     };
     const rzp1 = new Razorpay(options);

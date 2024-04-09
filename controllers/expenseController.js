@@ -1,5 +1,6 @@
 const path = require("path");
 const Expense = require("../models/expenseModel");
+const User = require("../models/userModel");
 
 exports.getHomePage = (req, res, next) => {
   res.sendFile(path.join(__dirname, "../", "public", "views", "homePage.html"));
@@ -26,6 +27,16 @@ exports.addExpense = async (req, res, next) => {
       category: category,
       userId: req.user.id,
     });
+    
+    const totalExpense = Number(req.user.totalExpenses) + Number(amount);
+    console.log(totalExpense);
+    console.log(result);
+
+    const updateUser = await User.update(
+      { totalExpenses: totalExpense },
+      { where: { id: req.user.id } }
+    );
+
     res.status(200).json({ message: "Expense added successfully" });
   } catch (error) {
     console.error(error);
