@@ -47,7 +47,14 @@ button {
   cursor: pointer;
   width: 100%;
 }
-
+.login-link {
+  margin-top: 10px;
+  text-align: center;
+}
+.login-link a {
+  color: #007bff;
+  text-decoration: none;
+}
 @media screen and (max-width: 600px) {
   .container {
     max-width: 90%;
