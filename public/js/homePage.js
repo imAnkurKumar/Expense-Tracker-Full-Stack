@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         { headers: { Authorization: token } }
       );
       const expenses = response.data;
-      // console.log(expenses);
+      // console.log("expenses>>:", expenses);
 
       expenses.forEach((expense) => {
         const expenseItem = createExpenseItem(expense);
@@ -73,8 +73,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         { headers: { Authorization: token } }
       );
 
+      // console.log("response from server", response.data.expense.id);
       if (response.status === 200) {
-        const newExpense = { amount, description, category };
+        const newExpense = {
+          amount,
+          description,
+          category,
+          id: response.data.expense.id,
+        };
         const expenseItem = createExpenseItem(newExpense);
 
         expenseList.appendChild(expenseItem);
@@ -94,6 +100,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (e.target.classList.contains("delete-button")) {
       const expenseItem = e.target.parentElement;
       const expenseId = expenseItem.dataset.expenseId;
+      console.log("expenseId>>:", expenseId);
 
       try {
         await axios.delete(
@@ -119,6 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
      <p class="description">${expense.description}</p>
      <button class="delete-button">Delete</button>
    `;
+    // console.log("expenseItem>>>", expenseItem);
     return expenseItem;
   }
   function showLeaderboard() {
